@@ -1,0 +1,6 @@
+# Stack Backend Ultraliviano (Prohibido Pandas, Openpyxl, SQLAlchemy)
+fastapi>=0.110.0
+uvicorn[standard]>=0.29.0
+peewee>=3.17.0
+pydantic>=2.7.0
+fpdf2>=2.7.8
