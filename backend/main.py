@@ -133,6 +133,12 @@ class AsistenciaResponseSchema(BaseModel):
 # Endpoints de Diagnóstico
 # =====================================================================
 
+@app.get("/", tags=["Sistema"])
+def read_root():
+    """Endpoint raíz de prueba para verificar que la API está en línea."""
+    return {"status": "API Escolar online"}
+
+
 @app.get("/api/health", tags=["Sistema"])
 def health_check():
     """Verifica que el backend y el motor SQLite estén operativos."""
@@ -282,3 +288,10 @@ def registrar_asistencia(datos: AsistenciaUpsertSchema):
         observacion=registro.observacion,
         metricas_actualizadas=MetricasAsistenciaSchema(**metricas_actualizadas),
     )
+
+
+if __name__ == "__main__":
+    import uvicorn
+
+    uvicorn.run("main:app", host="0.0.0.0", port=8000, reload=True)
+
