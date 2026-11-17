@@ -1,0 +1,6 @@
+Plaintext
+fastapi
+uvicorn
+peewee
+fpdf2
+pydantic

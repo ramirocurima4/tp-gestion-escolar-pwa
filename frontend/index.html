@@ -1,0 +1,209 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Gestión Escolar PWA - ISFD San Roque</title>
+  <link rel="stylesheet" href="styles.css" />
+  <link rel="manifest" href="manifest.json" />
+<meta name="theme-color" content="#1e40af" />
+</head>
+<body>
+
+  <!-- VISTA 1: LOGIN -->
+  <section id="vista-login" class="login-contenedor">
+    <div class="tarjeta login-caja">
+      <h1>Gestión Escolar PWA</h1>
+      <p class="subtitulo">I.S.F.D. "Juan García de Cossio"</p>
+      <form id="form-login">
+        <div class="campo">
+          <label for="login-email">Correo Electrónico</label>
+          <input type="email" id="login-email" value="admin@escuela.edu.ar" required />
+        </div>
+        <div class="campo">
+          <label for="login-password">Contraseña</label>
+          <input type="password" id="login-password" value="admin123" required />
+        </div>
+        <button type="submit" style="width: 100%;">Ingresar al Sistema</button>
+        <p id="login-error" class="mensaje-estado" style="color: var(--peligro);"></p>
+      </form>
+    </div>
+  </section>
+
+  <!-- VISTA 2: PANEL PRINCIPAL -->
+  <section id="vista-app" class="oculto">
+    <header>
+      <div>
+        <strong>Sistema de Gestión Escolar</strong>
+        <span id="info-usuario" style="font-size: 0.85rem; opacity: 0.9; margin-left: 0.5rem;"></span>
+      </div>
+      <button id="btn-salir" class="btn-peligro">Cerrar Sesión</button>
+    </header>
+
+    <nav class="nav-tabs">
+      <button class="tab-btn activa" data-tab="tab-asistencia">1. Asistencia y Alertas</button>
+      <button class="tab-btn" data-tab="tab-libro">2. Libro de Temas</button>
+      <button class="tab-btn" data-tab="tab-admin">3. Altas (Cursos / Alumnos)</button>
+    </nav>
+
+    <main>
+      <!-- PESTAÑA 1: ASISTENCIA Y REPORTES -->
+      <div id="tab-asistencia" class="contenido-tab">
+        <div class="tarjeta">
+          <h2>Control Diario de Asistencia</h2>
+          <div class="grid-2" style="margin-top: 1rem;">
+            <div class="campo">
+              <label>Seleccionar Curso</label>
+              <select id="select-curso-asistencia"></select>
+            </div>
+            <div class="campo">
+              <label>ID de Asignatura</label>
+              <input type="number" id="input-asignatura-asistencia" value="1" min="1" />
+            </div>
+          </div>
+          <div style="display: flex; gap: 0.5rem; flex-wrap: wrap;">
+            <button id="btn-cargar-lista" type="button">Cargar Lista de Alumnos</button>
+            <button id="btn-ver-alertas" type="button" class="btn-secundario">Ver Alertas de Regularidad</button>
+            <button id="btn-pdf-asistencia" type="button" class="btn-exito">Descargar Planilla PDF</button>
+          </div>
+
+          <div id="contenedor-tabla-asistencia" class="oculto">
+            <table>
+              <thead>
+                <tr>
+                  <th>DNI</th>
+                  <th>Alumno</th>
+                  <th>Estado (P / A / J / T)</th>
+                  <th>Observación</th>
+                </tr>
+              </thead>
+              <tbody id="tbody-asistencia"></tbody>
+            </table>
+            <button id="btn-guardar-asistencia" style="margin-top: 1rem;">Guardar Asistencia del Día</button>
+          </div>
+          <p id="msg-asistencia" class="mensaje-estado"></p>
+        </div>
+
+        <!-- TABLERO DE ALERTAS -->
+        <div id="tarjeta-alertas" class="tarjeta oculto">
+          <h3>Alertas de Ausentismo y Regularidad (&lt; 75% o 3 faltas seguidas)</h3>
+          <table>
+            <thead>
+              <tr>
+                <th>Alumno</th>
+                <th>% Asistencia</th>
+                <th>Faltas Consecutivas</th>
+                <th>Motivo</th>
+              </tr>
+            </thead>
+            <tbody id="tbody-alertas"></tbody>
+          </table>
+        </div>
+      </div>
+
+      <!-- PESTAÑA 2: LIBRO DE TEMAS -->
+      <div id="tab-libro" class="contenido-tab oculto">
+        <div class="tarjeta">
+          <h2>Libro de Temas Digital</h2>
+          <form id="form-libro-temas" style="margin-top: 1rem;">
+            <div class="grid-2">
+              <div class="campo">
+                <label>ID Asignatura</label>
+                <input type="number" id="lt-asignatura" value="1" required />
+              </div>
+              <div class="campo">
+                <label>Unidad Didáctica</label>
+                <input type="text" id="lt-unidad" placeholder="Ej: Unidad 1 - Algoritmos" required />
+              </div>
+            </div>
+            <div class="campo">
+              <label>Eje Temático</label>
+              <input type="text" id="lt-eje" placeholder="Ej: Estructuras de control condicionales" required />
+            </div>
+            <div class="campo">
+              <label>Contenidos Dictados</label>
+              <textarea id="lt-contenidos" rows="3" required></textarea>
+            </div>
+            <div class="campo">
+              <label>Observaciones Pedagógicas (Opcional)</label>
+              <input type="text" id="lt-obs" placeholder="Novedades de la clase..." />
+            </div>
+            <div style="display: flex; gap: 0.5rem; flex-wrap: wrap;">
+              <button type="submit">Registrar Clase</button>
+              <button type="button" id="btn-ver-temas" class="btn-secundario">Ver Historial</button>
+              <button type="button" id="btn-pdf-temas" class="btn-exito">Descargar Libro PDF</button>
+            </div>
+          </form>
+          <p id="msg-libro" class="mensaje-estado"></p>
+          <div id="lista-temas" style="margin-top: 1rem;"></div>
+        </div>
+      </div>
+
+      <!-- PESTAÑA 3: ALTAS INSTITUCIONALES -->
+      <div id="tab-admin" class="contenido-tab oculto">
+        <div class="grid-2">
+          <div class="tarjeta">
+            <h3>Nuevo Curso</h3>
+            <form id="form-curso" style="margin-top: 0.75rem;">
+              <div class="campo"><label>Año</label><input type="number" id="c-anio" value="1" required /></div>
+              <div class="campo"><label>División</label><input type="text" id="c-division" placeholder="A" required /></div>
+              <div class="campo"><label>Turno</label><input type="text" id="c-turno" value="Mañana" required /></div>
+              <button type="submit">Crear Curso</button>
+            </form>
+          </div>
+
+          <div class="tarjeta">
+            <h3>Nuevo Docente / Usuario</h3>
+            <form id="form-usuario" style="margin-top: 0.75rem;">
+              <div class="campo"><label>DNI</label><input type="text" id="u-dni" required /></div>
+              <div class="campo"><label>Nombre</label><input type="text" id="u-nombre" required /></div>
+              <div class="campo"><label>Apellido</label><input type="text" id="u-apellido" required /></div>
+              <div class="campo"><label>Email</label><input type="email" id="u-email" required /></div>
+              <div class="campo"><label>Contraseña</label><input type="password" id="u-pass" required /></div>
+              <div class="campo">
+                <label>Rol</label>
+                <select id="u-rol">
+                  <option value="docente">Docente</option>
+                  <option value="preceptor">Preceptor</option>
+                  <option value="alumno">Alumno</option>
+                  <option value="admin">Admin / Directivo</option>
+                </select>
+              </div>
+              <button type="submit">Registrar Usuario</button>
+            </form>
+          </div>
+
+          <div class="tarjeta">
+            <h3>Matricular Alumno</h3>
+            <form id="form-alumno" style="margin-top: 0.75rem;">
+              <div class="campo"><label>DNI</label><input type="text" id="a-dni" required /></div>
+              <div class="campo"><label>Nombre</label><input type="text" id="a-nombre" required /></div>
+              <div class="campo"><label>Apellido</label><input type="text" id="a-apellido" required /></div>
+              <div class="campo"><label>ID Curso</label><input type="number" id="a-curso" value="1" required /></div>
+              <button type="submit">Matricular Alumno</button>
+            </form>
+          </div>
+
+          <div class="tarjeta">
+            <h3>Nueva Asignatura</h3>
+            <form id="form-asignatura" style="margin-top: 0.75rem;">
+              <div class="campo"><label>Nombre Materia</label><input type="text" id="m-nombre" required /></div>
+              <div class="campo"><label>ID Curso</label><input type="number" id="m-curso" value="1" required /></div>
+              <div class="campo"><label>ID Docente</label><input type="number" id="m-docente" value="2" required /></div>
+              <button type="submit">Crear Asignatura</button>
+            </form>
+          </div>
+        </div>
+        <p id="msg-admin" class="mensaje-estado"></p>
+      </div>
+    </main>
+  </section>
+
+  <script src="app.js"></script>
+  <script>
+  if ("serviceWorker" in navigator) {
+    navigator.serviceWorker.register("./sw.js");
+  }
+</script>
+</body>
+</html>

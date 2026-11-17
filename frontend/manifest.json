@@ -1,0 +1,9 @@
+{
+  "name": "Gestión Escolar PWA - ISFD San Roque",
+  "short_name": "GestiónEscolar",
+  "start_url": "./index.html",
+  "display": "standalone",
+  "background_color": "#f1f5f9",
+  "theme_color": "#1e40af",
+  "icons": []
+}
