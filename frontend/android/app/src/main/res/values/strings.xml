@@ -1,0 +1,7 @@
+<?xml version='1.0' encoding='utf-8'?>
+<resources>
+    <string name="app_name">AulaPulse</string>
+    <string name="title_activity_main">AulaPulse</string>
+    <string name="package_name">com.isfdsanroque.aulapulse</string>
+    <string name="custom_url_scheme">com.isfdsanroque.aulapulse</string>
+</resources>

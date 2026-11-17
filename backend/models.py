@@ -31,6 +31,7 @@ class Alumno(BaseModel):
     dni = CharField(unique=True, max_length=15)
     nombre = CharField(max_length=100)
     apellido = CharField(max_length=100)
+    email = CharField(null=True, max_length=120)
     curso = ForeignKeyField(Curso, backref='alumnos', on_delete='RESTRICT')
     usuario = ForeignKeyField(Usuario, backref='perfil_alumno', null=True, on_delete='SET NULL')
     activo = BooleanField(default=True)

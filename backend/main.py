@@ -67,6 +67,13 @@ class AlumnoCreate(PydanticModel):
     curso_id: int
     usuario_id: Optional[int] = None
 
+class AlumnoAutogestionCreate(PydanticModel):
+    dni: str
+    nombre: str
+    apellido: str
+    email: str
+    curso_id: int
+
 class AsignaturaCreate(PydanticModel):
     nombre: str
     curso_id: int
@@ -170,6 +177,23 @@ def crear_alumno(
     alumno = Alumno.create(**datos.model_dump())
     return {"id": alumno.id, "mensaje": "Alumno matriculado correctamente"}
 
+@app.post("/alumnos/autogestion/", status_code=201, tags=["Autogestión"])
+def autogestion_alumno(datos: AlumnoAutogestionCreate):
+    # Endpoint público: no requiere token (matriculación por enlace de invitación)
+    if not Curso.get_or_none(Curso.id == datos.curso_id):
+        raise HTTPException(status_code=404, detail="Curso no encontrado")
+    if Alumno.select().where(Alumno.dni == datos.dni).exists():
+        raise HTTPException(status_code=400, detail="Ya estás matriculado con ese DNI")
+
+    alumno = Alumno.create(
+        dni=datos.dni,
+        nombre=datos.nombre,
+        apellido=datos.apellido,
+        email=datos.email,
+        curso=datos.curso_id
+    )
+    return {"id": alumno.id, "mensaje": "Matriculación realizada correctamente"}
+
 @app.get("/alumnos/", tags=["Estructura Académica"])
 def listar_alumnos(
     curso_id: Optional[int] = None,
@@ -193,6 +217,16 @@ def crear_asignatura(
 
     materia = Asignatura.create(**datos.model_dump())
     return {"id": materia.id, "mensaje": f"Asignatura '{materia.nombre}' asignada"}
+
+@app.get("/asignaturas/", tags=["Estructura Académica"])
+def listar_asignaturas(
+    curso_id: Optional[int] = None,
+    _: Usuario = Depends(obtener_usuario_actual)
+):
+    query = Asignatura.select()
+    if curso_id:
+        query = query.where(Asignatura.curso == curso_id)
+    return list(query.dicts())
 
 # ==========================================
 # 3. MÓDULO 1: ASISTENCIAS Y ALERTAS
