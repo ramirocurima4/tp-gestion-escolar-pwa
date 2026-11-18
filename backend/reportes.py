@@ -67,12 +67,15 @@ def generar_pdf_libro_temas(asignatura_nombre: str, curso_nombre: str, docente_n
         pdf.cell(0, 7, f"Fecha: {t['fecha']}  |  Unidad: {t['unidad_didactica']}  |  Eje: {t['eje_tematico']}", border=1, fill=True, ln=True)
         
         pdf.set_font("Helvetica", "", 9)
-        pdf.multi_cell(0, 6, f"Contenidos: {t['contenidos_dictados']}", border="LR")
+        pdf.set_x(pdf.l_margin)
+        pdf.multi_cell(0, 6, f"Contenidos: {t['contenidos_dictados']}", border="LR", new_x="LMARGIN", new_y="NEXT")
         
         if t.get("observaciones_pedagogicas"):
             pdf.set_font("Helvetica", "I", 8)
-            pdf.multi_cell(0, 5, f"Observaciones: {t['observaciones_pedagogicas']}", border="LRB")
+            pdf.set_x(pdf.l_margin)
+            pdf.multi_cell(0, 5, f"Observaciones: {t['observaciones_pedagogicas']}", border="LRB", new_x="LMARGIN", new_y="NEXT")
         else:
+            pdf.set_x(pdf.l_margin)
             pdf.cell(0, 1, "", border="T", ln=True)
         pdf.ln(3)
 

@@ -1,11 +1,14 @@
+import os
+from contextlib import asynccontextmanager
 from datetime import date
 from typing import Optional, List
-from fastapi import FastAPI, HTTPException, Depends, status
+from fastapi import FastAPI, HTTPException, Depends, Request, status
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import Response
 from fastapi.security import OAuth2PasswordRequestForm
 from pydantic import BaseModel as PydanticModel, Field
 
+from database import db
 from models import (
     Usuario, Curso, Alumno, Asignatura,
     Asistencia, LibroTemas, ActividadEvaluacion,
@@ -17,33 +20,79 @@ from auth import (
 )
 from reportes import generar_pdf_asistencia_curso, generar_pdf_libro_temas
 
+
+def inicializar_admin_seguro() -> None:
+    """Verifica si la tabla de usuarios está vacía y crea el admin desde variables de entorno (.env)."""
+    if Usuario.select().exists():
+        return
+
+    admin_email = (os.getenv("ADMIN_EMAIL") or "").strip()
+    admin_password = os.getenv("ADMIN_PASSWORD") or ""
+    admin_dni = (os.getenv("ADMIN_DNI") or "00000000").strip()
+    admin_nombre = (os.getenv("ADMIN_NOMBRE") or "Administrador").strip()
+    admin_apellido = (os.getenv("ADMIN_APELLIDO") or "Sistema").strip()
+
+    if not admin_email or not admin_password:
+        raise RuntimeError(
+            "La tabla de usuarios está vacía y faltan ADMIN_EMAIL o ADMIN_PASSWORD en backend/.env "
+            "para inicializar el usuario administrador de forma segura."
+        )
+
+    Usuario.create(
+        dni=admin_dni,
+        nombre=admin_nombre,
+        apellido=admin_apellido,
+        email=admin_email,
+        password_hash=hashear_password(admin_password),
+        rol="admin",
+        activo=True,
+    )
+
+
+@asynccontextmanager
+async def lifespan(_: FastAPI):
+    try:
+        inicializar_bd()
+        inicializar_admin_seguro()
+    finally:
+        if not db.is_closed():
+            db.close()
+    yield
+    if not db.is_closed():
+        db.close()
+    if hasattr(db, "close_all"):
+        db.close_all()
+
+
 app = FastAPI(
     title="API Gestión Escolar PWA - ISFD San Roque",
     description="Backend para Control de Asistencia, Alertas de Regularidad y Libro de Temas Digital.",
-    version="1.0.0"
+    version="1.0.0",
+    lifespan=lifespan,
 )
 
+# Configuración de CORS para producción (Web PWA, Render/Cloudflare y APK Capacitor)
+# Permite cualquier origen (*) incluyendo capacitor://localhost, http://localhost y dominios productivos
 app.add_middleware(
     CORSMiddleware,
     allow_origins=["*"],
+    allow_origin_regex=r"^(https?://.*|capacitor://localhost|ionic://localhost|http://localhost(:\d+)?)$",
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],
+    expose_headers=["Content-Disposition"],
 )
 
-# --- INICIALIZACIÓN Y USUARIO ADMIN POR DEFECTO ---
-@app.on_event("startup")
-def startup():
-    inicializar_bd()
-    if not Usuario.select().where(Usuario.rol == "admin").exists():
-        Usuario.create(
-            dni="00000000",
-            nombre="Administrador",
-            apellido="Sistema",
-            email="admin@escuela.edu.ar",
-            password_hash=hashear_password("admin123"),
-            rol="admin"
-        )
+
+@app.middleware("http")
+async def db_connection_middleware(request: Request, call_next):
+    db.connect(reuse_if_open=True)
+    try:
+        response = await call_next(request)
+        return response
+    finally:
+        if not db.is_closed():
+            db.close()
 
 # --- ESQUEMAS PYDANTIC ---
 class UsuarioCreate(PydanticModel):

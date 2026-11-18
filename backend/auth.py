@@ -2,15 +2,26 @@ import os
 import hashlib
 import hmac
 from datetime import datetime, timedelta, timezone
+from pathlib import Path
 from typing import List
 import jwt
+from dotenv import load_dotenv
 from fastapi import Depends, HTTPException, status
 from fastapi.security import OAuth2PasswordBearer
 from models import Usuario
 
-SECRET_KEY = "clave_secreta_tp_final_isfd_san_roque_2026"
-ALGORITHM = "HS256"
-ACCESS_TOKEN_EXPIRE_MINUTES = 480
+_env_path = Path(__file__).resolve().parent / ".env"
+load_dotenv(dotenv_path=_env_path)
+load_dotenv()
+
+SECRET_KEY = (os.getenv("JWT_SECRET_KEY") or os.getenv("SECRET_KEY") or "").strip()
+if not SECRET_KEY:
+    raise RuntimeError(
+        "Falta configurar JWT_SECRET_KEY (o SECRET_KEY) en el archivo backend/.env."
+    )
+
+ALGORITHM = os.getenv("JWT_ALGORITHM", "HS256").strip() or "HS256"
+ACCESS_TOKEN_EXPIRE_MINUTES = int(os.getenv("ACCESS_TOKEN_EXPIRE_MINUTES", "480"))
 
 oauth2_scheme = OAuth2PasswordBearer(tokenUrl="/auth/login")
 
