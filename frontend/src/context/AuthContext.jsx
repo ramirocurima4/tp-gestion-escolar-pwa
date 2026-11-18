@@ -1,6 +1,8 @@
 import { createContext, useCallback, useContext, useMemo, useState } from 'react'
 
-const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:8000'
+const API_URL = (
+  import.meta.env.VITE_API_URL || 'https://tp-gestion-escolar-pwa.onrender.com'
+).replace(/\/+$/, '')
 const TOKEN_KEY = 'aulapulse_token'
 const USER_KEY = 'aulapulse_user'
 
